@@ -30,9 +30,9 @@ namespace conference_api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddPooledDbContextFactory<ApplicationDbContext>(
-                options => options.UseSqlServer("Server=localhost,1633;Database=conferences;User Id=sa;Password=GraphQL!Workshop;"));
+                options => options.UseSqlServer(Configuration.GetConnectionString("conference-db")));
 
- 
+
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "conference_api", Version = "v1" }); });
         }
@@ -40,15 +40,13 @@ namespace conference_api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "conference_api v1"));
-            }
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "conference_api v1"));
+
 
             app.EnsureDatabaseIsCreated();
-            
+
             app.UseRouting();
 
             app.UseAuthorization();

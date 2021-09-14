@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  conference-db:
+    build:
+      context: ./conference-db/
+      dockerfile: ./Dockerfile
+    ports:
+      - '1633:1433'
+  conference-api:
+    build:
+      context: ../App/Services/conference-api/
+      dockerfile: ../../../Docker/conference-api/Dockerfile
+    ports:
+      - '5000:80'
+    depends_on:
+      - conference-db

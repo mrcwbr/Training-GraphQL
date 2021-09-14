@@ -18,6 +18,8 @@ mono_crash.*
 
 dist/
 
+settings.json
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
