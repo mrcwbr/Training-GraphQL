@@ -6,13 +6,13 @@ import express from "express";
 import depthLimit from 'graphql-depth-limit';
 import { createServer } from "http";
 import helmet from "helmet";
-import schema from './schema.graphql'
-import resolver from "./resolver";
+import typeDefs from "./typeDefs";
+import resolvers from "./resolvers";
 
 const app = express();
 const server = new ApolloServer({
-  typeDefs: schema,
-  resolvers: resolver,
+  typeDefs: typeDefs,
+  resolvers: resolvers,
   validationRules: [depthLimit(7)],
 });
 

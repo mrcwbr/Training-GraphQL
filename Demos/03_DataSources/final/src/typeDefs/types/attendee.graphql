@@ -1,0 +1,7 @@
+type Attendee {
+    id: ID!
+    firstName: String
+    lastName: String
+    emailAddress: String
+    userName: String
+}

@@ -15,7 +15,8 @@
 
 # Mono auto generated files
 mono_crash.*
-
+.DS_Store
+yarn.lock
 dist/
 
 settings.json
