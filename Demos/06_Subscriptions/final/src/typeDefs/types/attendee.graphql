@@ -21,3 +21,8 @@ input CreateAttendeeRequest {
   userName: String!
   sessionIds: [Int]
 }
+
+type AttendeeOperations {
+  addSession(sessionId: ID!): Boolean
+  delete: Boolean
+}

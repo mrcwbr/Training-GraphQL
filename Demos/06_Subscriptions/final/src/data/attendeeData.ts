@@ -9,6 +9,7 @@ export interface IAttendeeApi {
   attendeeById(attendeeId: number): Promise<IAttendee>;
   createAttendee(request: ICreateAttendeeRequest): Promise<IAttendee | IAttendeeMutationError>;
   deleteAttendee(attendeeId: number): Promise<Boolean>;
+  addAttendeeToSession(attendeeId: number, sessionId: number): Promise<IAttendee>;
 }
 
 export default class AttendeeData extends RESTDataSource implements IAttendeeApi {
@@ -50,5 +51,9 @@ export default class AttendeeData extends RESTDataSource implements IAttendeeApi
 
       return new Promise((resolve) => resolve(error));
     }
+  }
+
+  addAttendeeToSession(attendeeId: number, sessionId: number): Promise<IAttendee> {
+    return this.post<IAttendee>(`/attendees/${attendeeId}/sessions/${sessionId}`);
   }
 }

@@ -3,3 +3,8 @@ export enum MutationOperation {
   Update = 2,
   Delete = 3,
 }
+
+export enum SessionAttendeeOperation {
+  Add = 1,
+  Remove = 2,
+}

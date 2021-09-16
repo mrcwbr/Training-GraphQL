@@ -3,3 +3,9 @@ type Session {
     title: String,
     abstract: String
 }
+
+type SessionAttendeeChanged {
+    sessionId: ID!,
+    attendee: Attendee,
+    operation: SessionAttendeeOperation,
+}

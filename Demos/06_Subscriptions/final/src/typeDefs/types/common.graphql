@@ -3,3 +3,8 @@ enum MutationOperation {
   Update,
   Delete
 }
+
+enum SessionAttendeeOperation {
+  Add,
+  Remove
+}

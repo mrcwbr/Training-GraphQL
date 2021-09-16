@@ -84,6 +84,29 @@ namespace conference_api.Controllers
             return new OkObjectResult(true);
         }
 
+        [HttpPost("{attendeeId:int}/sessions/{sessionId:int}")]
+        [ProducesDefaultResponseType(typeof(AttendeeResponseModel))]
+        public async Task<IActionResult> AddAttendeeSession(int attendeeId, int sessionId)
+        {
+            await using var dbContext = _dbContextFactory.CreateDbContext();
+            var attendee = await dbContext.Attendees.Include(m => m.SessionsAttendees).FirstOrDefaultAsync(m => m.Id == attendeeId);
+
+            if(attendee == null)
+                return new BadRequestObjectResult($"Attendee with id '${attendeeId}' doesnt' exists.");
+            
+            if(attendee.SessionsAttendees.Any(m => m.SessionId == sessionId))
+                return new BadRequestObjectResult($"Attendee with id '${attendeeId}' is already assigned to session with id '${sessionId}'.");
+            
+            attendee.SessionsAttendees.Add(new SessionAttendee()
+            {
+                SessionId = sessionId
+            });
+
+            await dbContext.SaveChangesAsync();
+            
+            return new OkObjectResult(MapToResponseModel(attendee));
+        }
+
         private static AttendeeResponseModel MapToResponseModel(Attendee attendee) => new()
         {
             Id = attendee.Id,

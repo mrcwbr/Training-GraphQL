@@ -13,13 +13,18 @@ import SpeakerData from './data/speakerData';
 import dbConfig from './dbConfig';
 import AttendeeData from './data/attendeeData';
 import { ApolloServerPluginUsageReporting } from 'apollo-server-core';
+import { PubSub } from 'graphql-subscriptions';
 
 dotenv.config({ path: __dirname + '/.env' });
 
+export const pubsub = new PubSub();
+
 const app = express();
+const httpServer = createServer(app);
+
 const server = new ApolloServer({
-  typeDefs: typeDefs,
-  resolvers: resolvers,
+  typeDefs,
+  resolvers,
   introspection: true,
   playground: true,
   dataSources: () => {
@@ -54,10 +59,11 @@ const server = new ApolloServer({
   ],
 });
 
+server.installSubscriptionHandlers(httpServer);
+
 app.use(cors());
 app.use(compression());
 
 server.applyMiddleware({ app, path: '/graphql' });
 
-const httpServer = createServer(app);
 httpServer.listen({ port: 3000 }, (): void => console.log(`\n🚀      GraphQL is now running on http://localhost:3000/graphql`));

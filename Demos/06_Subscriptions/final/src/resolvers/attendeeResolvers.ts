@@ -4,7 +4,8 @@ import { IAttendeeApi } from '../data/attendeeData';
 import { ISessionApi } from '../data/sessionData';
 import { IAttendee, ISession } from '../models';
 import { IAttendeeMutationError } from '../models/attendee';
-import { MutationOperation } from '../models/common';
+import { SessionAttendeeOperation } from '../models/common';
+import { pubsub } from '../server';
 
 export default {
   Query: {
@@ -33,6 +34,7 @@ export default {
       const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
       return attendeeApi.deleteAttendee(args.attendeeId);
     },
+    attendee: (parent, { attendeeId }) => AttendeeOperations(attendeeId),
   },
   Attendee: {
     sessions: (parent: IAttendee, args, context, info): Promise<ISession[]> => {
@@ -53,3 +55,24 @@ export default {
     },
   },
 };
+
+const AttendeeOperations = (attendeeId: number) => ({
+  addSession: async (args, context, info: GraphQLResolveInfo) => {
+    const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
+    const attendee = await attendeeApi.addAttendeeToSession(attendeeId, args.sessionId);
+
+    pubsub.publish('ATTENDEE_SESSION_ADDED', {
+      sessionAttendeesChanged: {
+        sessionId: args.sessionId,
+        attendee: attendee,
+        operation: SessionAttendeeOperation.Add,
+      },
+    });
+
+    return true;
+  },
+  delete: (args, context, info: GraphQLResolveInfo) => {
+    const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
+    return attendeeApi.deleteAttendee(attendeeId);
+  },
+});
