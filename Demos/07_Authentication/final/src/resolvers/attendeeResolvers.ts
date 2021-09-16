@@ -15,9 +15,6 @@ export default {
     },
     attendee: async (parent, args, context, info: GraphQLResolveInfo): Promise<IAttendee> => {
       const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
-
-      console.log("Token", context.token)
-
       if (args.attendeeId === undefined || args.attendeeId < 1) throw new UserInputError("attendeeId param isn't valid", { attendeeId: args.attendeeId });
 
       try {
