@@ -1,4 +1,5 @@
 import { RESTDataSource } from 'apollo-datasource-rest';
+import { ApolloError } from 'apollo-server-express';
 import { IAttendee, ISession } from '../models';
 import { IAttendeeMutationError, ICreateAttendeeRequest } from '../models/attendee';
 import { MutationOperation } from '../models/common';

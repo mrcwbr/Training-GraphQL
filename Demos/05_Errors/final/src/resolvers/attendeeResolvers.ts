@@ -1,3 +1,4 @@
+import { ApolloError, UserInputError } from 'apollo-server-core';
 import { GraphQLResolveInfo } from 'graphql';
 import { IAttendeeApi } from '../data/attendeeData';
 import { ISessionApi } from '../data/sessionData';
@@ -11,9 +12,16 @@ export default {
       const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
       return attendeeApi.allAttendees();
     },
-    attendee: (parent, args, context, info: GraphQLResolveInfo): Promise<IAttendee> => {
+    attendee: async (parent, args, context, info: GraphQLResolveInfo): Promise<IAttendee> => {
       const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
-      return attendeeApi.attendeeById(args.attendeeId);
+
+      if (args.attendeeId === undefined || args.attendeeId < 1) throw new UserInputError("attendeeId param isn't valid", { attendeeId: args.attendeeId });
+
+      try {
+        return await attendeeApi.attendeeById(args.attendeeId);
+      } catch (e) {
+        throw new ApolloError(`Can't find Attendee with id '${args.attendeeId}'`, 'API_ERROR');
+      }
     },
   },
   Mutation: {
