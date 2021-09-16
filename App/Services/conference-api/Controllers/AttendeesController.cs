@@ -49,7 +49,7 @@ namespace conference_api.Controllers
             await using var dbContext = _dbContextFactory.CreateDbContext();
             var attendeeAlreadyExists = await dbContext.Attendees.AnyAsync(m => m.EmailAddress == request.EMailAddress && m.UserName == request.UserName);
             if (attendeeAlreadyExists)
-                return new BadRequestObjectResult($"User with email '${request.EMailAddress}' and userName '${request.UserName}' already exists.");
+                return new BadRequestObjectResult($"Attendee with email '${request.EMailAddress}' and userName '${request.UserName}' already exists.");
 
             var newAttendee = new Attendee()
             {
@@ -67,6 +67,21 @@ namespace conference_api.Controllers
             await dbContext.SaveChangesAsync();
 
             return new OkObjectResult(MapToResponseModel(attendeeEntity.Entity));
+        }
+
+        [HttpDelete("{attendeeId:int}")]
+        public async Task<IActionResult> DeleteAttendee(int attendeeId)
+        {
+            await using var dbContext = _dbContextFactory.CreateDbContext();
+            var attendee = await dbContext.Attendees.Include(m => m.SessionsAttendees).FirstOrDefaultAsync(m => m.Id == attendeeId);
+            
+            if(attendee == null)
+                return new BadRequestObjectResult($"Attendee with id '${attendeeId}' doesnt' exists.");
+
+            dbContext.Attendees.Remove(attendee);
+            await dbContext.SaveChangesAsync();
+
+            return new OkObjectResult(true);
         }
 
         private static AttendeeResponseModel MapToResponseModel(Attendee attendee) => new()

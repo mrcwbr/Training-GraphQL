@@ -1,0 +1,23 @@
+type Attendee {
+  id: ID!
+  firstName: String
+  lastName: String
+  emailAddress: String
+  userName: String
+  sessions: [Session]
+}
+
+type AttendeeMutationError {
+  operation: MutationOperation
+  attendeeId: ID
+  errorMessage: String
+}
+union CreateAttendeeResponse = Attendee | AttendeeMutationError
+
+input CreateAttendeeRequest {
+  firstName: String!
+  lastName: String!
+  emailAddress: String!
+  userName: String!
+  sessionIds: [Int]
+}

@@ -1,0 +1,5 @@
+enum MutationOperation {
+  Create,
+  Update,
+  Delete
+}
