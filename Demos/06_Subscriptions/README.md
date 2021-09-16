@@ -1,1 +1,4 @@
-
+- add subscription server
+- add mutation scoped type (addSession / delete)
+- add subscription
+- add pubSub Event

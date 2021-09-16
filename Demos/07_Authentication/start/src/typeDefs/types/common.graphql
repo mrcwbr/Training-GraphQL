@@ -1,0 +1,10 @@
+enum MutationOperation {
+  Create,
+  Update,
+  Delete
+}
+
+enum SessionAttendeeOperation {
+  Add,
+  Remove
+}
