@@ -1,23 +1,25 @@
 import { Box, CardContent, Divider } from '@material-ui/core';
+import { ISpeaker } from '../../models/speaker';
+import { getProfileImageUrl } from '../../services/profilePictureApi';
 import { SpeakerAvatar, SpeakerCard, SpeakerCountLabel, SpeakerCountValue, SpeakerHeading, SpeakerSubheader } from '../../styled/Speaker.styled';
 
-export const Speaker = () => {
+export const Speaker: React.FC<ISpeaker> = (speaker) => {
   return (
     <SpeakerCard>
       <CardContent>
-        <SpeakerAvatar src={'https://i.pravatar.cc/400'} />
-        <SpeakerHeading>Alan Podemski</SpeakerHeading>
-        <SpeakerSubheader>Poland</SpeakerSubheader>
+        <SpeakerAvatar src={getProfileImageUrl(speaker.id)} />
+        <SpeakerHeading>{speaker.name}</SpeakerHeading>
+        <SpeakerSubheader>{speaker.webSite}</SpeakerSubheader>
       </CardContent>
       <Divider light />
       <Box display={'flex'}>
         <Box p={2} flex={'auto'}>
-          <SpeakerCountLabel>Followers</SpeakerCountLabel>
-          <SpeakerCountValue>6941</SpeakerCountValue>
+          <SpeakerCountLabel>Sessions</SpeakerCountLabel>
+          <SpeakerCountValue>{speaker.sessionIds.length}</SpeakerCountValue>
         </Box>
         <Box p={2} flex={'auto'}>
-          <SpeakerCountLabel>Following</SpeakerCountLabel>
-          <SpeakerCountValue>12</SpeakerCountValue>
+          <SpeakerCountLabel>Attendees</SpeakerCountLabel>
+          <SpeakerCountValue>0</SpeakerCountValue>
         </Box>
       </Box>
     </SpeakerCard>

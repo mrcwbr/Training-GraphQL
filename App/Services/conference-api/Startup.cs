@@ -32,6 +32,11 @@ namespace conference_api
             services.AddPooledDbContextFactory<ApplicationDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("conference-db")));
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "MyTrustedOrigins",
+                    builder => { builder.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:4000", "http://localhost:3000"); });
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "conference_api", Version = "v1" }); });
@@ -48,6 +53,8 @@ namespace conference_api
             app.EnsureDatabaseIsCreated();
 
             app.UseRouting();
+            
+            app.UseCors("MyTrustedOrigins");
 
             app.UseAuthorization();
 

@@ -3,18 +3,17 @@ import Layout, { Root, getHeader, getDrawerSidebar, getSidebarTrigger, getSideba
 import styled from 'styled-components';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Icon from '@material-ui/core/Icon';
-import ListItemText from '@material-ui/core/ListItemText';
-import { Mic } from '@material-ui/icons';
 import NavHeader from './components/navigation/NavHeader';
-import Typography from '@material-ui/core/Typography';
-import { HeaderText } from './styled/Header.styled';
+import { HeaderGrow, HeaderText } from './styled/Header.styled';
 import NavMenu from './components/navigation/NavMenu';
 import Talks from './components/talks/Talks';
 import Speakers from './components/speakers/Speakers';
+import { Route, Switch } from 'react-router-dom';
+import Notifications from './components/Notifications';
+import Attendees from './components/attendees/Attendees';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect } from 'react';
+import { Button } from '@material-ui/core';
 
 const scheme = Layout();
 
@@ -52,6 +51,14 @@ const Content = getContent(styled);
 const Footer = getFooter(styled);
 
 const App = () => {
+  const { loginWithRedirect, isAuthenticated, isLoading, logout } = useAuth0();
+
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      loginWithRedirect();
+    }
+  }, [isAuthenticated, loginWithRedirect, isLoading]);
+
   return (
     <Root scheme={scheme}>
       {({ state: { sidebar } }) => (
@@ -63,6 +70,10 @@ const App = () => {
               <HeaderText noWrap color={'textSecondary'}>
                 NDC London 2019
               </HeaderText>
+              <HeaderGrow />
+              <Button variant="outlined" color="secondary" onClick={() => logout({ returnTo: window.location.origin })}>
+                Logout
+              </Button>
             </Toolbar>
           </Header>
           <DrawerSidebar sidebarId="unique_id">
@@ -73,10 +84,23 @@ const App = () => {
             <CollapseBtn />
           </DrawerSidebar>
           <Content>
-            {/*  <Talks /> */}
-            <Speakers />
+            <Switch>
+              <Route path="/talks">
+                <Talks />
+              </Route>
+              <Route path="/speakers">
+                <Speakers />
+              </Route>
+              <Route path="/attendees">
+                <Attendees />
+              </Route>
+              <Route path="/">
+                <Talks />
+              </Route>
+            </Switch>
           </Content>
           <Footer></Footer>
+          <Notifications />
         </>
       )}
     </Root>

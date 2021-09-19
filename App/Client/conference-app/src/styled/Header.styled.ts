@@ -6,3 +6,7 @@ export const HeaderText = styled(Typography)`
   min-width: 0;
   font-size: 18;
 `;
+
+export const HeaderGrow = styled.div`
+  flex-grow: 1;
+`;

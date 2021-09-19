@@ -1,33 +1,45 @@
-import styled from 'styled-components';
+import { Fab } from '@material-ui/core';
+import { Add } from '@material-ui/icons';
+import { useEffect, useState } from 'react';
+import { ISpeaker } from '../../models/speaker';
+import { getSpeakers } from '../../services/conferenceApi';
+import { AddButtonWrapper } from '../../styled/Common.styled';
+import { SpeakerList, SpeakerListItem } from '../../styled/Speaker.styled';
 import Speaker from './Speaker';
 
-const SpeakerList = styled.ul``;
-
-const SpeakerListItem = styled.li`
-  list-style-type: none;
-  display: inline-block;
-
-  &:not(:first-of-type) {
-    margin: 10px 30px;
-  }
-`;
-
 export const Speakers = () => {
+  const [speakers, setSpeakers] = useState<ISpeaker[]>([]);
+
+  useEffect(() => {
+    const loadSpeakers = async () => {
+      if (speakers.length === 0) {
+        const speakersList = await getSpeakers();
+        setSpeakers(speakersList);
+      }
+    };
+
+    loadSpeakers();
+  }, [speakers]);
+
+  const renderSpeakers = () => {
+    return speakers.map((speaker) => {
+      return (
+        <SpeakerListItem key={speaker.id}>
+          <Speaker {...speaker} />
+        </SpeakerListItem>
+      );
+    });
+  };
+
   return (
-    <SpeakerList>
-      <SpeakerListItem>
-        <Speaker />
-      </SpeakerListItem>
-
-      <SpeakerListItem>
-        <Speaker />
-      </SpeakerListItem>
-
-
-      <SpeakerListItem>
-        <Speaker />
-      </SpeakerListItem>
-    </SpeakerList>
+    <>
+      <AddButtonWrapper>
+        <Fab color="secondary" aria-label="add">
+          <Add />
+        </Fab>
+      </AddButtonWrapper>
+      <SpeakerList>{renderSpeakers()}</SpeakerList>
+    </>
   );
 };
 

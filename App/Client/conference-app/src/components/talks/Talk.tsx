@@ -1,22 +1,41 @@
-import { TalkAttendee, TalkCard, TalkCardAbstract, TalkCardContent, TalkCardDivider, TalkCardImage, TalkCardTitle } from '../../styled/TalkCard.styled';
+import { ISession } from '../../models/session';
+import { getProfileImageUrl } from '../../services/profilePictureApi';
+import { TalkAttendee, TalkCard, TalkCardAbstract, TalkCardAbstractWrapper, TalkCardAttendeesWrapper, TalkCardContent, TalkCardDivider, TalkCardImage, TalkCardTitle, TalkCardTitleWrapper, TimeSlot, TimeSlotTag } from '../../styled/Talk.styled';
+import moment from 'moment';
 
-const faces = ['http://i.pravatar.cc/300?img=1', 'http://i.pravatar.cc/300?img=2', 'http://i.pravatar.cc/300?img=3', 'http://i.pravatar.cc/300?img=4'];
+export const Talk: React.FC<ISession> = (session) => {
+  const getTimeSlot = () => {
+    const startTime = moment(new Date(session.startTime)).format('HH:mm');
+    const endTime = moment(new Date(session.endTime)).format('HH:mm');
 
-export const Talk = () => {
+    return `${startTime} - ${endTime}`;
+  };
+
   return (
-    <TalkCard>
-      <TalkCardImage image={'https://image.freepik.com/free-vector/laptop-with-program-code-isometric-icon-software-development-programming-applications-dark-neon_39422-971.jpg'} />
-      <TalkCardContent>
-        <TalkCardTitle variant={'h6'} gutterBottom>
-          Nature Around Us
-        </TalkCardTitle>
-        <TalkCardAbstract variant={'caption'}>We are going to learn different kinds of species in nature that live together to form amazing environment.</TalkCardAbstract>
-        <TalkCardDivider light />
-        {faces.map((face) => (
-          <TalkAttendee key={face} src={face} />
-        ))}
-      </TalkCardContent>
-    </TalkCard>
+    <>
+      <TalkCard>
+        <TimeSlotTag>
+          <TimeSlot variant={"caption"}>{getTimeSlot()}</TimeSlot>
+        </TimeSlotTag>
+        <TalkCardImage image={'https://image.freepik.com/free-vector/laptop-with-program-code-isometric-icon-software-development-programming-applications-dark-neon_39422-971.jpg'} />
+        <TalkCardContent>
+          <TalkCardTitleWrapper>
+            <TalkCardTitle variant={'h6'} gutterBottom>
+              {session.title}
+            </TalkCardTitle>
+          </TalkCardTitleWrapper>
+          <TalkCardAbstractWrapper>
+            <TalkCardAbstract variant={'caption'}>{session.abstract}</TalkCardAbstract>
+          </TalkCardAbstractWrapper>
+          <TalkCardAttendeesWrapper>
+            <TalkCardDivider light />
+            {session.speakerIds.map((speakerId) => (
+              <TalkAttendee key={speakerId} src={getProfileImageUrl(speakerId)} />
+            ))}
+          </TalkCardAttendeesWrapper>
+        </TalkCardContent>
+      </TalkCard>
+    </>
   );
 };
 

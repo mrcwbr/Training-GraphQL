@@ -1,4 +1,4 @@
-import { Avatar, Box, Card } from '@material-ui/core';
+import { Avatar, Card } from '@material-ui/core';
 import styled from 'styled-components';
 
 export const SpeakerCard = styled(Card)`
@@ -42,4 +42,12 @@ export const SpeakerCountValue = styled.p`
   font-weight: bold;
   margin-bottom: 4;
   letter-spacing: 1px;
+`;
+
+export const SpeakerList = styled.ul``;
+
+export const SpeakerListItem = styled.li`
+  list-style-type: none;
+  display: inline-block;
+  margin: 10px 30px;
 `;
