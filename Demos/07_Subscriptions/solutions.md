@@ -91,3 +91,19 @@ export const SESSION_ADDED_TO_ATTENDEE_SUBSCRIPTION = gql`
   }
 `;
 ```
+
+**graphql/models/session.ts**
+
+```typescript
+export enum SessionAttendeeoperation {
+  Add,
+  Remove,
+}
+
+export interface ISessionAttendeeChanged {
+  attendeeId: number;
+  newSessionIds: number[];
+  operation: SessionAttendeeoperation,
+  sessions: ISessionGraphModel[]
+}
+```
