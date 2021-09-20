@@ -1,16 +1,17 @@
-- add subscription server
-- add mutation scoped type (addSession / delete)
-- add subscription
-- add pubSub Event
+# Challenge #7: Subscriptions
 
-# Apollo 
+## Ziel
 
-## server.ts
+In den letzten Übungen haben wir `Queries` und `Mutation` kennengelernt. Jetzt wollen wir uns den dritte Pfeiler näher ansehen: `Subscription`. Subscriptions erlauben es abonnierten Clients Events zuzustellen.
 
-import { ApolloServerPluginUsageReporting } from 'apollo-server-core';
-import { PubSub } from 'graphql-subscriptions';
+Wir werden zuerst den Apollo Server um Subscriptions erweitern und danach die Subscriptions in der React App abonnieren.
 
-dotenv.config({ path: __dirname + '/.env' });
+### Apollo Server um Subscriptions erweitern
+
+Wir passen zuerst unsere `server.ts` an und binden den Subscription Server ein.
+
+```typescript
+//...
 
 export const pubsub = new PubSub();
 
@@ -18,41 +19,7 @@ const app = express();
 const httpServer = createServer(app);
 
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  introspection: true,
-  playground: true,
-  debug: true,
-  dataSources: () => {
-    return {
-      speakerDb: new SpeakerData(dbConfig),
-      sessionApi: new SessionData(),
-      attendeeApi: new AttendeeData(),
-    };
-  },
-  validationRules: [depthLimit(7)],
-  plugins: [
-    ApolloServerPluginUsageReporting({
-      sendVariableValues: { all: true },
-      sendHeaders: { all: true },
-      generateClientInfo: ({ request }) => {
-        const headers = request.http && request.http.headers;
-        if (headers) {
-          return {
-            clientName: headers['apollographql-client-name'],
-            clientVersion: headers['apollographql-client-version'],
-            userAgent: headers['user-agent'],
-          };
-        } else {
-          return {
-            clientName: 'Unknown Client',
-            clientVersion: 'Unversioned',
-            userAgent: 'Unkown userAgent',
-          };
-        }
-      },
-    }),
-  ]
+  // Konfiguration bleibt identisch
 });
 
 server.installSubscriptionHandlers(httpServer);
@@ -63,98 +30,68 @@ app.use(compression());
 server.applyMiddleware({ app, path: '/graphql' });
 
 httpServer.listen({ port: 3000 }, (): void => console.log(`\n🚀      GraphQL is now running on http://localhost:3000/graphql`));
+```
 
-## typeDefs/index.ts
+In erweitern wir die `typeDefs` um Subscriptions. Dazu erstellen wir die Datei `typeDefs/subscription.graphql`
 
-import SubscriptionTypeDef from './subscription.graphql'
-
-export default [scalars, query, MutationTypeDef, SubscriptionTypeDef, speakerType, SessionTypeDef, AttendeeTypeDef];
-
-## typeDefs/subscription.graphql
-
+```typescript
 type Subscription {
   sessionAttendeesChanged: SessionAttendeeChanged
 }
+```
 
-## typeDefs/types/attendee.graphql
+In der `typeDef/types/session.graphql` fügen wir den `SessionAttendeeChanged` Type hinzu. Der soll folgende Informationen beinhalten:
 
-enum SessionAttendeeOperation {
-  Add,
-  Remove
-}
+- Die neu hinzugefügen SessionIds
+- ID des Teilnehmers
+- Die Operation (Enum) mit Add oder Remove
+- Eine Liste aller Sessions für die TeilnehmerId
 
-## typeDefs/types/session.graphql
+> In der `solutions.md` findet ihr die Auflösung zu `SessionAttendeeChanged`. Weitere Informationen zu Subscriptions gibt es in den [Apollo Docs](https://www.apollographql.com/docs/apollo-server/data/subscriptions/)
 
-type SessionAttendeeChanged {
-  newSessionIds: [ID]
-  sessions: [Session]
-  attendeeId: ID!
-  operation: SessionAttendeeOperation
-}
+### Event erstellen
 
-## models/session.ts
+Im `resolvers/attendeeResolvers.ts` findet ihr die Mutation `attendeeAddSessions`. Importiert dort den `pubSub` aus dem `server.ts` und publish ein Event.
 
-export enum SessionAttendeeOperation {
-  Add = 1,
-  Remove = 2,
-}
+Dazu benötigt ihr einen eindeutigen Namen (z.B. `ATTENDEE_SESSION_ADDED`) und ein Objekt mit den Daten für `SessionAttendeeChanged`, wofür ich vorab noch ein Interface in `models/session.ts` anlegt.
 
-export interface ISessionAttendeeChanged {
-  attendeeId: number;
-  newSessionIds: number[];
-  sessions: ISession[];
-  operation: SessionAttendeeOperation;
-}
+### Event veröffentlichen
 
-## resolvers/attendeeResolver.ts
+Im `resolvers/sessionResolvers.ts` benötigt es einen neuen Bereich `Subscription`, wo ihr das Event veröffentlich, was ihr vorher in `attendeeAddSessions` erstellt habt.
 
-import { SessionAttendeeOperation } from '../models/session';
-import { pubsub } from '../server';
-
-Mutation: {
+```typescript
+export default {
+  Query: {
     // ...
-    attendeeAddSessions: async (parent, args, context, info): Promise<IAttendeeMutationError | IAttendee> => {
-      const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
-      const sessionApi: ISessionApi = context.dataSources.sessionApi;
-
-      const attendee = await attendeeApi.addSessions(args.request.attendeeId, args.request.sessionIds);
-
-      const sessionIds = [...(attendee as any).sessionIds, ...args.request.sessionIds];
-      const sessions = await sessionApi.sessionsByIds(sessionIds);
-
-      pubsub.publish('ATTENDEE_SESSION_ADDED', {
-        sessionAttendeesChanged: {
-          newSessionIds: args.request.sessionIds,
-          sessions: sessions,
-          attendeeId: args.request.attendeeId,
-          operation: SessionAttendeeOperation.Add,
-        },
-      });
-
-      return attendee;
-    },
-
-## resolvers/sessionResolver.ts
-
-import { pubsub } from '../server';
-
-Query: {},
-Subscription: {
+  },
+  Subscription: {
     sessionAttendeesChanged: {
       subscribe: () => pubsub.asyncIterator(['ATTENDEE_SESSION_ADDED']),
     },
   },
-Mutation: {}
+  Session: {
+    // ...
+  },
+  SessionAttendeeOperation: {
+    Add: 1,
+    Remove: 2,
+  },
+};
+```
 
-import { pubsub } from '../server';
+## Events in React Client subscripen
 
-# Client App
+In der React App müssen wir zuerst das ws transport Package hinzufügen:
 
+```bash
 yarn add subscriptions-transport-ws
+```
 
-## index.tsx
+In der `index.tsx` müssen wir den ApolloProvider nun erweitern, damit er auch die Subscription Informationen enthält.
 
-import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache, NormalizedCacheObject, split } from '@apollo/client';
+```typescript
+// ..
+
 import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
@@ -163,7 +100,7 @@ const httpLink = new HttpLink({
 });
 
 const wsLink = new WebSocketLink({
-  uri: 'ws://localhost:3000/subscriptions',
+  uri: 'ws://localhost:3000/graphql',
   options: {
     reconnect: true,
   },
@@ -185,53 +122,32 @@ const createApolloClient = (): ApolloClient<NormalizedCacheObject> => {
   });
 };
 
-## graphql/subscriptions/sessions.ts
+// ...
+```
 
-import { gql } from '@apollo/client';
+In `graphql/subscriptions/sessions.ts` hinterlegen wir nun eine Abfrage für die Subscription. Wie man diese baut finder ihr in den Apollo Docs oder in `solutions.md`
 
-export const SESSION_ADDED_TO_ATTENDEE_SUBSCRIPTION = gql`
-  subscription OnSessionsAddedToAttendee {
-    sessionAttendeesChanged {
-      attendeeId
-      operation
-      newSessionIds
-      sessions {
-        id
-        title
-      }
-    }
+Danach müsst ihr noch `graphql/models/session.ts` um die beiden Interfaces für `SessionAttendeeOperation` und `SessionAttendeeChanged` erweitern.
+
+Der letzte Schritt ist nun die Component `Attendee` anzupassen. Hier müssen wir mit dem `useSubscription` Hook uns auf die Subscription abonnieren.
+
+```typescript
+const [sessions, setSessions] = useState<ISessionGraphModel[]>(attendee.sessions);
+
+const { data } = useSubscription<{ sessionAttendeesChanged: ISessionAttendeeChangedGraphModel }>(SESSION_ADDED_TO_ATTENDEE_SUBSCRIPTION);
+
+if (data !== undefined && data.sessionAttendeesChanged.attendeeId === attendee.id) {
+  if (sessions !== undefined && sessions.length !== data.sessionAttendeesChanged.sessions.length) {
+    setSessions(data.sessionAttendeesChanged.sessions);
   }
-`;
-
-## graphql/models/session.ts
-
-export enum SessionAttendeeoperation {
-  Add,
-  Remove,
 }
 
-export interface ISessionAttendeeChanged {
-  attendeeId: number;
-  newSessionIds: number[];
-  operation: SessionAttendeeoperation,
-  sessions: ISessionGraphModel[]
-}
-
-## components/attendees/attendee.tsx
-
- const [sessions, setSessions] = useState<ISessionGraphModel[]>(attendee.sessions);
-
-  const { data } = useSubscription<{ sessionAttendeesChanged: ISessionAttendeeChangedGraphModel }>(SESSION_ADDED_TO_ATTENDEE_SUBSCRIPTION);
-
-  if (data !== undefined && data.sessionAttendeesChanged.attendeeId === attendee.id) {
-    if (sessions !== undefined && sessions.length !== data.sessionAttendeesChanged.sessions.length) {
-      setSessions(data.sessionAttendeesChanged.sessions);
-    }
-  }
-
-  ...
-
-  <SessionsList>
+  return (
+    <AttendeeCard>
+      // ..
+      <AttendeeSessions display={'flex'} flexDirection={'column'}>
+        <SessionsHeading>Sessions</SessionsHeading>
+        <SessionsList>
           {sessions !== undefined &&
             sessions.map((m) => (
               <SessionsListItem key={m.id}>
@@ -239,3 +155,16 @@ export interface ISessionAttendeeChanged {
               </SessionsListItem>
             ))}
         </SessionsList>
+      </AttendeeSessions>
+      // ..
+    </AttendeeCard>
+  );
+
+  // ...
+};
+```
+
+## Ressourcen
+
+- [Apollo Server - Subscriptions](https://www.apollographql.com/docs/apollo-server/data/subscriptions/)
+- [Apollo Client - Subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/)
