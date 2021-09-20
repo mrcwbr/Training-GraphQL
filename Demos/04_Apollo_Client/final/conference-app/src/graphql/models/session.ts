@@ -6,5 +6,5 @@ export interface ISessionGraphModel {
   abstract: string;
   startTime: Date;
   endTime: Date;
-  speakers: [ISpeakerGraphModel];
+  speakers: ISpeakerGraphModel[];
 }
