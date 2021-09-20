@@ -5,7 +5,6 @@ import compression from 'compression';
 import express from "express";
 import depthLimit from 'graphql-depth-limit';
 import { createServer } from "http";
-import helmet from "helmet";
 import schema from './schema.graphql'
 import resolver from "./resolver";
 
@@ -17,7 +16,6 @@ const server = new ApolloServer({
 });
 
 app.use(cors());
-app.use(helmet());
 app.use(compression());
 
 server.applyMiddleware({ app, path: '/graphql' });
