@@ -1,0 +1,5 @@
+type Mutation {
+  createAttendee(request: CreateAttendeeRequest!): AttendeeMutationResponse
+  attendeeAddSessions(request: AddSessionsToAttendeeRequest!): AttendeeMutationResponse
+  deleteAttendee(attendeeId: ID!): AttendeeMutationResponse
+}

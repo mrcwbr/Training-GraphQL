@@ -1,0 +1,8 @@
+type Session {
+    id: ID!,
+    title: String,
+    abstract: String,
+    startTime: Date,
+    endTime: Date,
+    speakers: [Speaker]
+}

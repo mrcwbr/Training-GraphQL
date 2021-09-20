@@ -1,5 +1,0 @@
-type Session {
-    id: ID!,
-    title: String,
-    abstract: String
-}

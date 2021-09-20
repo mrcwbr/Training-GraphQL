@@ -1,4 +1,0 @@
-type Mutation {
-    createAttendee(request: CreateAttendeeRequest!): CreateAttendeeResponse    
-    deleteAttendee(attendeeId: ID!): Boolean
-}
