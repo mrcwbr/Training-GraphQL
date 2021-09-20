@@ -1,4 +1,4 @@
-# Lösungen zu Challegne #2:
+# Lösungen zu Challenge #2:
 
 ## Queries
 
