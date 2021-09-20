@@ -1,7 +1,5 @@
 import { SQLDataSource } from 'datasource-sql';
-import { ISpeaker } from '../models';
 
-const CACHE_MINUTE = 10;
 const SPEAKERS_TABLE = 'Speakers';
 const SESSIONS_TABLE = 'Sessions';
 const SPEAKER_SESSIONS_TABLE = 'SessionSpeaker';

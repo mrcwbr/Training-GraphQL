@@ -1,15 +1,15 @@
-import { ISessionApi } from '../data/sessionData';
-import { ISession } from '../models';
+import { IAttendeeApi } from '../data/attendeeData';
+import { IAttendee } from '../models';
 
 export default {
   Query: {
-    sessions: (parent, args, context, info): Promise<ISession[]> => {
-      const sessionApi: ISessionApi = context.dataSources.sessionApi;
-      return sessionApi.allSessions();
+    attendees: (parent, args, context, info): Promise<IAttendee[]> => {
+      const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
+      return attendeeApi.allAttendees();
     },
-    session: (parent, args, context, info): Promise<ISession> => {
-      const sessionApi: ISessionApi = context.dataSources.sessionApi;
-      return sessionApi.sessionById(args.sessionId);
+    attendee: (parent, args, context, info): Promise<IAttendee> => {
+      const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
+      return attendeeApi.attendeeById(args.attendeeId);
     },
   },
 };

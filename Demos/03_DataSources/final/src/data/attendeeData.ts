@@ -1,5 +1,5 @@
 import { RESTDataSource } from 'apollo-datasource-rest';
-import { IAttendee, ISession } from '../models';
+import { IAttendee } from '../models';
 
 export interface IAttendeeApi {
   allAttendees(): Promise<IAttendee[]>;
