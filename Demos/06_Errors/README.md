@@ -1,27 +1,26 @@
-setup apollo studio
-dotenv
-add ApolloServerPluginUsageReporting
-Headers
-apolloError
-UserInputError
-client format errors
+# Challenge #6: Error Handling & Analyse
+## Ziel
 
-```
-APOLLO_KEY=service:conference-graphql:gv2tyiNI5XEyKybtYWXskw
-APOLLO_GRAPH_ID=conference-graphql
-APOLLO_GRAPH_VARIANT=current
-APOLLO_SCHEMA_REPORTING=true
-```
+In dieser Übung wollen wir herrausfinden, wie wir Fehler übermitteln und wie wir mit Hilfe des [Apollo Studios](https://studio.apollographql.com/) Telemetry Daten erfassen können.
 
-```
+## Erstellen eines Apollo Studio Account 
+
+Wir erstellen uns unter https://studio.apollographql.com/ einen neuen Apollo Studio Account und legen einen neuen Graph an. Als GraphType wählen wir **Deployed** und kopieren uns die generieren Environemnt Variables.
+
+Wir fügen dem Apollo Server Projekt das Package `dotenv` hinzu und erstellen uns ein `/src/.env` File. Dort fügen wir die 4 Environment Variables vom Apollo Studio ein.
+
+Nun müssen wir noch unsere `server.ts` erweitern um das Apollo Studio zu integrieren:
+
+```typescript
+import 'graphql-import-node';
 import dotenv from 'dotenv';
- ...
+// ...
 
- dotenv.config({ path: __dirname + '/.env' });
+dotenv.config({ path: __dirname + '/.env' });
 
-...
-
-plugins: [
+const server = new ApolloServer({
+  // ...
+  plugins: [
     ApolloServerPluginUsageReporting({
       sendVariableValues: { all: true },
       sendHeaders: { all: true },
@@ -43,20 +42,21 @@ plugins: [
       },
     }),
   ],
+});
 ```
 
+Wenn wir nun den Apollo Server starten und ein paar Queries im Playground oder mit der React App ausführen, werden wir diverse Einträge im Apollo Studio finden.
 
-```
+## Fehler übermitteln
 
-attendee: async (parent, args, context, info: GraphQLResolveInfo): Promise<IAttendee> => {
-      const attendeeApi: IAttendeeApi = context.dataSources.attendeeApi;
+Apollo bietet uns verschiedene [Fehlertypen](https://www.apollographql.com/docs/apollo-server/data/errors/#error-codes), die wir je nach Anwendungsfall entsprecht übermitteln können. Außerdem können auch eigene Fehlertypen implementiert werden.
 
-      if (args.attendeeId === undefined || args.attendeeId < 1) throw new UserInputError("attendeeId param isn't valid", { attendeeId: args.attendeeId });
+Wir wollen bei dem Resolver `Query.attendee` einen `UserInputError` zurückgeben, wenn die `attendeeId` < 1 oder undefinded ist.
 
-      try {
-        return await attendeeApi.attendeeById(args.attendeeId);
-      } catch (e) {
-        throw new ApolloError(`Can't find Attendee with id '${args.attendeeId}'`, 'API_ERROR');
-      }
-    },
-```
+Sollte kein Teilnehmer gefunden werden, geben wir einen Apollo Error zurück.
+
+> Die Lösung findet ihr in `solutions.md`
+## Ressourcen
+
+- [Apollo Studio Docu](https://www.apollographql.com/docs/studio/)
+- [Errors](https://www.apollographql.com/docs/apollo-server/data/errors/)
