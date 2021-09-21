@@ -13,4 +13,5 @@ services:
     ports:
       - '5000:80'
     depends_on:
-      - conference-db
+      conference-db:
+        condition: service_started
