@@ -1,12 +1,12 @@
 import 'graphql-import-node';
 import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-express';
-import mocks from '../src/mocks';
 import resolvers from '../src/resolvers';
 import typeDefs from '../src/typeDefs';
 import SpeakerData from '../src/data/speakerData';
 import SessionData from '../src/data/sessionData';
 import AttendeeData from '../src/data/attendeeData';
 import dbConfig from '../src/dbConfig';
+import mocks from '../src/mocks';
 
 let apolloServer: ApolloServer | undefined;
 
@@ -28,7 +28,7 @@ beforeAll(() => {
         attendeeApi: new AttendeeData(),
       };
     },
-    //mocks: mocks,
+    mocks: mocks,
   });
 
   apolloServer = server;
