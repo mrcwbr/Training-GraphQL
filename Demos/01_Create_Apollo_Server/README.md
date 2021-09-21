@@ -67,19 +67,29 @@ Nun braucht ihr nochen `src` Folder, wo alle weiteren Dateien hinterlegt werden.
 
 Erstellt euch im `src` Folder eine `schema.graphql` mit folgender Definition:
 
-```js
+```typescript
 type Query {
     hello: String
 }
 ```
 
-Ausserdem einen Resolver `resolver.ts`. Der Rückgabewert für `hello` sollte _world_ sein.
+Ausserdem einen Resolver `resolver.ts`. 
+
+```typescript
+export default {
+  Query: {
+    hello: () => {
+      return 'World';
+    },
+  },
+};
+```
 
 ### server.ts erstellen
 
 In `server.ts` implementieren wir den Apollo Server. 
 
-Wichtig ist als erstes `import "graphql-import-node";` einzufügen, damit wir die `.graphql` Dateien direkt importieren können.
+Wichtig ist als erstes `import "graphql-import-node"` einzufügen, damit wir die `.graphql` Dateien direkt importieren können.
 
 Ihr könnt den Apollo Server nach folgenden Leitfaden implementieren. Alternative findet ihr die Lösung dem `final` Folder.
 
